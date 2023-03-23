@@ -1,0 +1,100 @@
+TMPro Rich Text Tags (Modify text format and options):
+*Each tag is enclosed in < > and precedes the word you want to change
+*Use / with tag in < > to end the previous tag's effect
+
+*If you use hexadecimal values (with #) with Ink you must precede it with '\' since Ink uses '#' for tags
+
+ex. <align="right">Right (aligns 'Right' to the right)
+ex. The <i>quick brown fox</i> jumps (italics for 'quick brown fox')
+
+Alignment:
+<align="right">
+<align="center">
+<align="left">
+
+Color and Alpha:
+<color="[COLOR NAME]">
+supported colors: black, blue, green, orange, purple, red, white and yellow
+
+<color=[HEXADECIMAL VALUE]>
+ex. <color=#005500>
+*using hexadecimal values can omit the 'color' tag
+ex. <#0000FF>
+
+<color=[HEXADECIMAL VALUE][ALPHA]>
+specify the alpha (optional) when using hexadecimals
+ex. <color=#FF000088>
+
+<alpha=[HEXADECIMAL ALPHA VALUE]>
+change only the alpha with this tag
+ex. <alpha=#FF>Alpha  ex. <alpha=#88>Precentage
+
+Terminating colors will terminate previous color and apply starting tag (since color change will continue to end of text)
+ex <color="red">Red, <color="blue">Blue,</color> and red again.
+
+Bold and Italic:
+<b> to bold
+<i> to italicize
+
+
+Spacing
+ex. <cspace=1em>Spacing
+*positive values push characters apart
+
+ex. <cspace=-0.5em>Timing
+*negative values push them together
+
+
+Font
+<font="Impact SDF">Font
+*Font name in "" 
+
+Identation
+ex. 1.<indent=15%>Bullet point List
+*Indents persists across lines
+
+Line Height
+ex. <line-height=50%>Half of normal Line Height
+
+Line Indentation
+ex. <line-indent=15%>Line text
+*Indents after tag and before the start of another line
+
+Lowercase, Uppercase, Smallcaps
+ex. <lowercase>Alice and Bob (produces alice and bob)
+ex. <uppercase>Alice and Bob (produces ALICE AND BOB)
+ex. <smallcaps>Alice and Bob (similar to uppercase, but each non uppercase letter is decreased in size)
+
+Margins
+ex. <margin=5em>Smaller Margin (both right and left margins are closer)
+ex. <margin-left= 5em>Left Margin Only (only left margin changes)
+
+Mark
+<mark=[HEXADECIMAL VALUE+ APLHA]>
+ex. <mark=#ffff00aa> Highlight
+*Marks add an overlay to text, so decrease alpha to be able to see text underneath
+
+Non-breaking Spaces
+ex. <nobr>I M P O R T A N T
+*normally, each letter is now treated as a different word, but with this tag, it stays as 1 word
+
+Font Size
+<size=[PERCENT OF ORIGINAL]>
+ex. <size=80%>Echo
+
+Horizontal Space
+ex. Some <space=5em> space
+*putting ' ' (space) between tag allows it to word-wrap separately 
+*whereas without it sticks (wraps) to the word it touches
+
+Strikethrough and Underline
+The <s>quick</s> fox and <u>lazy</u> dog
+
+Subscript and Superscript
+<sub> for subscript
+<sup> for superscript
+ex. 1m<sup>3</sup> of H<sub>2</sub>0.
+
+
+
+

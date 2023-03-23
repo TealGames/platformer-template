@@ -1,0 +1,105 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!78 &1
+TagManager:
+  serializedVersion: 2
+  tags:
+  - ground
+  - obstacle
+  layers:
+  - Default
+  - TransparentFX
+  - Ignore Raycast
+  - Ground
+  - Water
+  - UI
+  - Confiner
+  - Enemy
+  - 
+  - 
+  - Player
+  - Projectile
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  m_SortingLayers:
+  - name: Background -10
+    uniqueID: 3827444459
+    locked: 0
+  - name: Background -9
+    uniqueID: 500137885
+    locked: 0
+  - name: Background -8
+    uniqueID: 2432476617
+    locked: 0
+  - name: Background -7
+    uniqueID: 1045562153
+    locked: 0
+  - name: Background -6
+    uniqueID: 3401208769
+    locked: 0
+  - name: Background -5
+    uniqueID: 3330661841
+    locked: 0
+  - name: Background -4
+    uniqueID: 2016177057
+    locked: 0
+  - name: Background -3
+    uniqueID: 1607907637
+    locked: 0
+  - name: Background -2
+    uniqueID: 1450923701
+    locked: 0
+  - name: Background -1
+    uniqueID: 3085732343
+    locked: 0
+  - name: Default
+    uniqueID: 0
+    locked: 0
+  - name: Foreground 1
+    uniqueID: 130571325
+    locked: 0
+  - name: Foreground 2
+    uniqueID: 866420965
+    locked: 0
+  - name: Foreground 3
+    uniqueID: 2547689071
+    locked: 0
+  - name: Foreground 4
+    uniqueID: 2752840553
+    locked: 0
+  - name: Foreground 5
+    uniqueID: 954318429
+    locked: 0
+  - name: Foreground 6
+    uniqueID: 1533928679
+    locked: 0
+  - name: Foreground 7
+    uniqueID: 3686401639
+    locked: 0
+  - name: Foreground 8
+    uniqueID: 1793824095
+    locked: 0
+  - name: Foreground 9
+    uniqueID: 4189740661
+    locked: 0
+  - name: Foreground 10
+    uniqueID: 3003959621
+    locked: 0

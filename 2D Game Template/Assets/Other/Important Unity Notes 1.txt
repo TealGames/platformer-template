@@ -1,0 +1,5 @@
+Important notes:
+
+-In order to remove the line between tiled spirtes, you can edit a sprite's area by going into the Sprite Editor and moving the rectangle closer in on the sprite
+-In order to not need a follow and look at target for a virtual camera, but have the "Body" changes available/changeable, change the Body type to a "Framing Transposer"
+-All scenes must be named with Snake Case (no spaces, capitalize every first letter in word) because Scene enum in GameManager follows this naming pattern

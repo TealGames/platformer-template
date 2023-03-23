@@ -1,0 +1,27 @@
+Special C# characters:
+
+@ symbol before string means to ignore escape characters ('\')
+ex. @"Bob said: "Hey"" will treat every character as a literal
+
+@ symbol could also used for variable names to use C# keywords as var names
+ex. var @switch= true;
+    var @if= 1;
+
+? symbol is used to check null variables (*Commonly used in C# events)
+ex. animator?.SetTrigger("attack_trig"); is the same as:
+    if (animator!=null) animator.SetTrigger("attack_trig");
+
+? symbol could also be used to check simple if statements (plus using it to assign values to vars)
+ex. (!hasAttacked)? Attack() : return; which is the same as:
+    if (!hasAttacked) Attack();
+    else return;
+ex. bool isSwitchOn= (state== State.On)? true: false;
+
+# symbol can be used to write messages to the compiler
+ex. private void Function()
+    #region Declaration
+    { // do stuff...
+    }
+    #end_region
+
+

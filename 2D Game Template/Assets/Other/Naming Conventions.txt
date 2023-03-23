@@ -1,0 +1,22 @@
+Naming Conventions:
+private fields: "_" + camelCase
+public fields: PascalCase
+local variables: camelCase
+(bool variables: "is/has"+ case depending on scope)
+constant variables: ALL_CAPS_WITH_UNDERSCORES
+
+Methods: PascalCase
+UnityEvents/c# events: "On"+ PascalCase
+
+Animator variables: camelCase+ "_" + "trig/b/f/int"
+Animation names: snake_case
+
+Exposed variables: [COMPONENT]+ ALL_CAPS_WITH_UNDERSCORES_NAME
+(ex. MIXER_MASTER_VOLUME)
+
+Scenes: PascalCase (name them with "Level" at the end)
+
+Sound Effects/Voice files: all_lowercase_with_underscores
+Music files (if not your own): [Song name] +"by" + [artist's name] 
+Music files (own): Capital_Snake_Case
+
