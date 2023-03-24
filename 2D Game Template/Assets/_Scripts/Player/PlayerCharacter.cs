@@ -167,6 +167,7 @@ public class PlayerCharacter : MonoBehaviour, IDamageable
 
         foreach (var inventoryItem in Enum.GetNames(typeof(InventoryItemTypes)))
         {
+            if (inventoryItem== InventoryItemTypes.None.ToString()) continue;
             inventoryItems.Add(inventoryItem.ToString(), 0);
             //UnityEngine.Debug.Log($"Added {inventoryItem} to dictionary");
         }
@@ -510,6 +511,8 @@ public class PlayerCharacter : MonoBehaviour, IDamageable
             return 0;
         }
     }
+
+    public Dictionary<string, int> GetCurrentInventoryItems() => inventoryItems;
 
     public void AddWeapon(string weaponName, GameObject gameObject) => availableWeapons.Add(weaponName, gameObject);
 
