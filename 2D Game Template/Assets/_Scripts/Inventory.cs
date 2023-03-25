@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 using TMPro;
+using UnityEngine.EventSystems;
 
 public class Inventory : MonoBehaviour
 {
@@ -17,13 +18,18 @@ public class Inventory : MonoBehaviour
     [Tooltip("Note: the purpose of the container objects is to have the main parent class script running (causes errors when running scripts with deactivated objects) " +
         "while the visuals are still enabled and disabled")]
     [SerializeField] private GameObject itemDescriptionContainer;
-    [SerializeField] private Animator itemDescriptionAnimator;
+
+    [Tooltip("The gameObject that holds all of the different inventory item cells")][SerializeField] private GameObject itemCellsContainer;
+
+    [Tooltip("The gameObject that appears on the object when it is the one that is selected in the inventory")]
+    [SerializeField] private GameObject selectedItemIdentifier;
 
     [SerializeField] private TextMeshProUGUI itemNameText;
     [SerializeField] private TextMeshProUGUI itemDescriptionText;
     [SerializeField] private TextMeshProUGUI itemLoreText;
 
-    [SerializeField] private GameObject[] itemCells;
+    private GameObject selectedGameObject;
+    private GameObject firstCell;
 
     [Header("Sounds")]
 
@@ -52,34 +58,42 @@ public class Inventory : MonoBehaviour
 
     public void EnableInventory()
     {
-
         if (GameManager.Instance.GetCurrentGameState() == GameManager.GameState.Playing)
         {
-            foreach (var itemCell in itemCells) itemCell.gameObject.SetActive(false);
-
-            Dictionary<string, int> inventoryItems = PlayerCharacter.Instance.GetCurrentInventoryItems();
-            if (itemCells != null)
+            if (itemCellsContainer!=null)
             {
+                //loops through all items in the parent container with all cells
+                for (int i = 0; i < itemCellsContainer.transform.childCount; i++) itemCellsContainer.transform.GetChild(i).gameObject.SetActive(false);
+
+                Dictionary<string, int> inventoryItems = PlayerCharacter.Instance.GetCurrentInventoryItems();
                 foreach (var item in inventoryItems)
                 {
-                    if (PlayerCharacter.Instance.GetInventoryItemQuantity(item.Key) >0)
+                    if (PlayerCharacter.Instance.GetInventoryItemQuantity(item.Key) > 0)
                     {
                         UnityEngine.Debug.Log($"Current testing {item.Key}, {item.Value}");
-                        int itemIndex= GetCellIndexByType(item.Key);
-
+                        GameObject currentCell = GetCellByType(item.Key);
+                        
                         //make a new list and store all textMeshProUGUIs in cell and change first text (quantity text) found
                         List<TextMeshProUGUI> textList = new List<TextMeshProUGUI>();
-                        itemCells[itemIndex].GetComponentsInChildren<TextMeshProUGUI>(textList);
+                        currentCell.GetComponentsInChildren<TextMeshProUGUI>(textList);
                         textList[0].text = item.Value.ToString();
 
-                        itemCells[itemIndex].SetActive(true);
+                        currentCell.SetActive(true);
                     }
                 }
+                SelectFirstItem();
+
             }
-            else UnityEngine.Debug.LogWarning("Note: the inventory item cells UI objects are not set up but inventory items are being accessed!");
-            
+            else UnityEngine.Debug.LogWarning("Note: the inventory item cells UI parent object is not set up but inventory items are being accessed!");
+
+            //inventory button can disable inventory, not enable
             PlayerCharacter.Instance.OnInventoryButtonPressed -= EnableInventory;
+            PlayerCharacter.Instance.OnInventoryButtonPressed += DisableInventory;
+
+            //if player damaged or escape button is pressed, disable inventory
             PlayerCharacter.Instance.OnPlayerDamage += DisableInventory;
+            PlayerCharacter.Instance.OnEscapeButtonPressed+= DisableInventory;
+
             OnInventoryEnabled?.Invoke();
 
             PlayerCharacter.Instance.FreezePlayer(true);
@@ -88,6 +102,8 @@ public class Inventory : MonoBehaviour
 
             if (inventoryActivateSound!=null) audioSource?.PlayOneShot(inventoryActivateSound);
             StartCoroutine(AudioManager.Instance.FadeSounds(musicVolumeChangeMultiplier, inventoryFadeDuration));
+
+            
         }
         else UnityEngine.Debug.LogError("Inventory button was pressed but since current game state is not GameManager.GameState.Playing, the inventory cannot be brought up!");
     }
@@ -96,46 +112,89 @@ public class Inventory : MonoBehaviour
     {
         StartCoroutine(AudioManager.Instance.FadeSounds((1 / musicVolumeChangeMultiplier), inventoryFadeDuration));
 
-        PlayerCharacter.Instance.OnEscapeButtonPressed += EnableInventory;
+        //inventory button can enable inventory, not disable
+        PlayerCharacter.Instance.OnInventoryButtonPressed -= DisableInventory;
+        PlayerCharacter.Instance.OnInventoryButtonPressed += EnableInventory;
+
+        //if player gets damaged or escape button is pressed, dont disable inventory again
         PlayerCharacter.Instance.OnPlayerDamage -= DisableInventory;
+        PlayerCharacter.Instance.OnEscapeButtonPressed -= DisableInventory;
 
         OnInventoryDisabled?.Invoke();
 
         PlayerCharacter.Instance.FreezePlayer(false);
 
         if (animator != null) animator.SetBool("isActivated", false);
-        else gameObject.SetActive(false);
+        else inventoryContainer.SetActive(false);
     }
 
-    public void EnableItemDescription(ObjectTextSO objectData)
+    private void SetItemDescription(GameObject itemCell)
     {
-        itemDescriptionContainer.gameObject.SetActive(true);
-        if (itemDescriptionAnimator != null) itemDescriptionAnimator?.SetTrigger("activated_trig");
-
-        itemNameText.text= objectData.objectName;
-        itemDescriptionText.text = objectData.objectDescription;
-        itemLoreText.text = objectData.objectLore;
-    }
-
-    public void DisableItemDescription()
-    {
-        itemDescriptionContainer.gameObject.SetActive(false);
-        if (itemDescriptionAnimator != null) itemDescriptionAnimator?.SetTrigger("deactivated_trig");
-
-        itemNameText.text = "";
-        itemDescriptionText.text = "";
-        itemLoreText.text = "";
-    }
-
-    private int GetCellIndexByType(string inventoryItemType)
-    {
-        int index = 0;
-        foreach(var item in itemCells)
+        if (itemCell.TryGetComponent<InventoryItemType>(out InventoryItemType inventoryScript))
         {
-            if (item.GetComponent<InventoryItemType>().GetInventoryItemType().ToString() == inventoryItemType) return index;
-            index++;
+            UnityEngine.Debug.Log("Item description is being set!");
+            ObjectTextSO objectData= inventoryScript.GetItemDescription();
+            itemDescriptionContainer.gameObject.SetActive(true);
+
+            itemNameText.text = objectData.objectName;
+            itemDescriptionText.text = objectData.objectDescription;
+            itemLoreText.text = objectData.objectLore;
         }
-        return 0;
-        UnityEngine.Debug.LogWarning($"Getting the inventory item with type {inventoryItemType} was not found from the cell gameObject images!");
+        else UnityEngine.Debug.LogError($"SetItemDescription() was called with gameObject {itemCell} but it does not have the required InventoryItemType.cs script!");
     }
+
+    private IEnumerator SetItemIdentifier(RectTransform transform)
+    {
+        yield return new WaitForEndOfFrame();
+        selectedItemIdentifier.GetComponent<RectTransform>().position = transform.position;
+
+    }
+        
+    private GameObject GetCellByType(string inventoryItemType)
+    {
+        
+        for (int i=0; i<itemCellsContainer.transform.childCount; i++)
+        {
+            if (itemCellsContainer.transform.GetChild(i).gameObject.GetComponent<InventoryItemType>().GetInventoryItemType().ToString()
+                == inventoryItemType) return itemCellsContainer.transform.GetChild(i).gameObject;
+        }
+        return null;
+        UnityEngine.Debug.LogWarning($"Getting the inventory item with type {inventoryItemType} was not found from the cell gameObject images!");  
+    }
+
+    private void SelectFirstItem()
+    {
+        UnityEngine.Debug.Log("Select first item called!");
+        for (int i = 0; i < itemCellsContainer.transform.childCount; i++)
+        {
+            if (itemCellsContainer.transform.GetChild(i).gameObject.activeSelf)
+            {
+                firstCell = itemCellsContainer.transform.GetChild(i).gameObject;
+                UnityEngine.Debug.Log($"First cell is {firstCell.name}");
+
+                //set the first cell to have identifier and item description
+                StartCoroutine(SetItemIdentifier(firstCell.GetComponent<RectTransform>()));
+                SetItemDescription(firstCell);
+                break;
+            }
+            
+        }
+    }
+
+    //when an inventory item is clicked on
+    public void HandleItemClick(BaseEventData eventData)
+    {
+        if (eventData != null)
+        {
+            UnityEngine.Debug.Log("Item selected called!");
+            selectedGameObject= eventData.selectedObject.gameObject;
+
+            StartCoroutine(SetItemIdentifier(selectedGameObject.GetComponent<RectTransform>()));
+            SetItemDescription(selectedGameObject);
+        }
+        else UnityEngine.Debug.LogWarning("Item that was clicked on has null event data!");
+        
+    }
+
+    
 }

@@ -15,3 +15,4 @@ MonoBehaviour:
   objectName: Test Object
   objectDescription: This is a test object's item description. This item does not
     exist in the game though!
+  objectLore: Does this object have lore? Nobody knows!
