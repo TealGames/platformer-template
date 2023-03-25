@@ -128,6 +128,7 @@ public class GameManager : MonoBehaviour
     {
         //UnityEngine.Debug.Log($"Scene loaded is {sceneLoaded}");
         if (changeTimeScale) Time.timeScale = adjustedTimeScale;
+        UnityEngine.Debug.Log($"Game state is {currentGameState}");
             /*
         if (sceneLoaded)
         //since active scene cant be set until the scene has loaded we subscribe to the event and set it as active scene when it has finished loading

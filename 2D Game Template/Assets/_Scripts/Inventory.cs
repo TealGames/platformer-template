@@ -10,6 +10,12 @@ public class Inventory : MonoBehaviour
     [SerializeField] private Animator animator;
 
     [Header("UI")]
+    [Tooltip("Note: the purpose of the container objects is to have the main parent class script running (causes errors when running scripts with deactivated objects) " +
+        "while the visuals are still enabled and disabled")]
+    [SerializeField] private GameObject inventoryContainer;
+
+    [Tooltip("Note: the purpose of the container objects is to have the main parent class script running (causes errors when running scripts with deactivated objects) " +
+        "while the visuals are still enabled and disabled")]
     [SerializeField] private GameObject itemDescriptionContainer;
     [SerializeField] private Animator itemDescriptionAnimator;
 
@@ -33,8 +39,10 @@ public class Inventory : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        
+        PlayerCharacter.Instance.OnInventoryButtonPressed += EnableInventory;
+        inventoryContainer.SetActive(false);
     }
+        
 
     // Update is called once per frame
     void Update()
@@ -44,8 +52,11 @@ public class Inventory : MonoBehaviour
 
     public void EnableInventory()
     {
+
         if (GameManager.Instance.GetCurrentGameState() == GameManager.GameState.Playing)
         {
+            foreach (var itemCell in itemCells) itemCell.gameObject.SetActive(false);
+
             Dictionary<string, int> inventoryItems = PlayerCharacter.Instance.GetCurrentInventoryItems();
             if (itemCells != null)
             {
@@ -53,9 +64,15 @@ public class Inventory : MonoBehaviour
                 {
                     if (PlayerCharacter.Instance.GetInventoryItemQuantity(item.Key) >0)
                     {
+                        UnityEngine.Debug.Log($"Current testing {item.Key}, {item.Value}");
                         int itemIndex= GetCellIndexByType(item.Key);
+
+                        //make a new list and store all textMeshProUGUIs in cell and change first text (quantity text) found
+                        List<TextMeshProUGUI> textList = new List<TextMeshProUGUI>();
+                        itemCells[itemIndex].GetComponentsInChildren<TextMeshProUGUI>(textList);
+                        textList[0].text = item.Value.ToString();
+
                         itemCells[itemIndex].SetActive(true);
-                        //quantity of the item should be set here
                     }
                 }
             }
@@ -67,9 +84,9 @@ public class Inventory : MonoBehaviour
 
             PlayerCharacter.Instance.FreezePlayer(true);
             if (animator != null) animator.SetBool("isActivated", true);
-            else gameObject.SetActive(true);
+            else inventoryContainer.SetActive(true);
 
-            audioSource?.PlayOneShot(inventoryActivateSound);
+            if (inventoryActivateSound!=null) audioSource?.PlayOneShot(inventoryActivateSound);
             StartCoroutine(AudioManager.Instance.FadeSounds(musicVolumeChangeMultiplier, inventoryFadeDuration));
         }
         else UnityEngine.Debug.LogError("Inventory button was pressed but since current game state is not GameManager.GameState.Playing, the inventory cannot be brought up!");

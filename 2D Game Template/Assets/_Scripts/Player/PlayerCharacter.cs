@@ -110,7 +110,9 @@ public class PlayerCharacter : MonoBehaviour, IDamageable
 
     [SerializeField] private float randomYellRepeatRate;
 
-    [SerializeField] private AudioClip[] ninjaYells;
+    [Tooltip("Sounds that are played at random intervals based on the random yell repeat rate")]
+    [SerializeField] private AudioClip[] randomSounds;
+
     [SerializeField] private AudioClip respawnSound;
 
 
@@ -136,6 +138,9 @@ public class PlayerCharacter : MonoBehaviour, IDamageable
     [SerializeField] private bool hasInfiniteHealth;
     [SerializeField] private bool doNoRespawning;
     [SerializeField] private bool dontLoseCurrencyOnKilled;
+    [Tooltip("If true, provide the setup scriptable object with the new inventory item quantities to change the current inventory to be that of the amounts and items specified")]
+    [SerializeField] private bool setInventoryItems;
+
     //[Tooltip("If true, will have the serialized dictionaries (available weapons and inventory) update their keys and values " +
       //  "(note: it may be costly over time as a loop is run everytime a dictionary value is added)")]
     //[SerializeField] private bool displayDictionaryData;
@@ -143,6 +148,9 @@ public class PlayerCharacter : MonoBehaviour, IDamageable
     [SerializeField] [Tooltip("If true and player starts a quest, then dialogue that only gets triggered with certain dialogue or choices is triggered from first NPC's interaction")] 
     private bool dontRequireCertainDialogueToTriggerQuest;
 
+    [Tooltip("The defined inventory item data that overrides the curent inventory items on Start()")][SerializeField] private InventorySetupSO inventorySetupData;
+
+    [Space(15)]
     [SerializedDictionary("Item Name", "Item Quantity")] public SerializedDictionary<string, int> inventoryItemsDisplay;
     [SerializedDictionary("Weapon Name", "Weapon GameObject")] public SerializedDictionary<string, GameObject> availableWeaponsDisplay;
 
@@ -174,6 +182,7 @@ public class PlayerCharacter : MonoBehaviour, IDamageable
 
         SetBeginningWeapons();
         SetHealth(maxHealth);
+        if (setInventoryItems && inventorySetupData != null) SetCurrentInventoryItems(inventorySetupData);
     }
 
     // Update is called once per frame
@@ -233,24 +242,7 @@ public class PlayerCharacter : MonoBehaviour, IDamageable
 
     void OnCollisionEnter2D(Collision2D collision)
     {
-        if (collision != null)
-        {
-            if (collision.gameObject.CompareTag("ground"))
-            {
-                isGrounded = true;
-                if (doCameraShakeOnJump) StartCoroutine(cameraStateScript.GetActiveVCam().GetComponent<CameraEffects>().ShakeCamera(LensPrecentageOnCameraJump, cameraShakeDuration));
-                PlaySound(landingSound, 0.5f, 1.5f, 0.2f);
-            }
-
-            else isGrounded = false;
-
-            if (collision.gameObject.CompareTag("obstacle") && !isFrozen)
-            {
-                float bounce = 20.0f;
-                playerRb.AddForce(collision.contacts[0].normal * bounce, ForceMode2D.Impulse);
-                //these two lines of code create a bounce effect after the player gets hit
-            }
-        }
+        
     }
 
     void OnTriggerEnter2D(Collider2D collider)
@@ -270,6 +262,7 @@ public class PlayerCharacter : MonoBehaviour, IDamageable
             OnTriggerExit?.Invoke(collider.gameObject, objectComponents);
         }
     }
+
 
     public void InteractPressed(InputAction.CallbackContext context)
     {
@@ -299,7 +292,6 @@ public class PlayerCharacter : MonoBehaviour, IDamageable
         if (context.performed) OnInventoryButtonPressed?.Invoke();
     }
 
-
     public void Attack(InputAction.CallbackContext context)
     {
         if (context.performed && canAttack)
@@ -328,6 +320,13 @@ public class PlayerCharacter : MonoBehaviour, IDamageable
             if (currentAttackCooldownCoroutine != null) StartCoroutine(currentAttackCooldownCoroutine);
             else UnityEngine.Debug.Log("The current attack cooldown coroutine is null!");
         }
+    }
+
+
+    private IEnumerator AttackCooldown(float attackCooldown)
+    {
+        yield return new WaitForSeconds(attackCooldown);
+        canAttack = true;
     }
 
     public void SwapWeapons(InputAction.CallbackContext context)
@@ -387,20 +386,22 @@ public class PlayerCharacter : MonoBehaviour, IDamageable
         audioSource.PlayOneShot(sound, volume);
     }
 
-    private void PlayRandomYells()
+    private void PlayRandomSounds()
     {
         int chanceOfYell = UnityEngine.Random.Range(0, 100);
         if (chanceOfYell > 90)
         {
-            PlaySound(ninjaYells[UnityEngine.Random.Range(0, ninjaYells.Length)], 0.95f, 1.05f, 0.5f);
+            PlaySound(randomSounds[UnityEngine.Random.Range(0, randomSounds.Length)], 0.95f, 1.05f, 0.5f);
         }
     }
+
 
     private void CheckMoveSpeed()
     {
         if (!Mathf.Approximately(move.x, 0.0f)) animator.SetFloat("speed_f", 10.0f);
         if (Mathf.Approximately(move.x, 0.0f)) animator.SetFloat("speed_f", 0.0f);
     }
+
 
     public void TakeDamage(int damage)
     {
@@ -423,6 +424,14 @@ public class PlayerCharacter : MonoBehaviour, IDamageable
             StartCoroutine(IFrames());
         }
         else return;
+    }
+
+    private IEnumerator IFrames()
+    {
+        UnityEngine.Debug.Log("IFrames started");
+        yield return new WaitForSeconds(invulnerableTime);
+        isDamageable = true;
+        UnityEngine.Debug.Log("IFrames ended!");
     }
 
     public void Killed()
@@ -457,6 +466,7 @@ public class PlayerCharacter : MonoBehaviour, IDamageable
         //transform.position = respawnPosition.position;
     }
 
+
     public void FreezePlayer(bool freezePlayer)
     {
         if (freezePlayer)
@@ -467,26 +477,8 @@ public class PlayerCharacter : MonoBehaviour, IDamageable
         else isFrozen = false;
     }
 
+    public void SetPlayerPosition(Transform teleportTransform) => transform.position = new Vector2(teleportTransform.position.x, teleportTransform.position.y);
 
-    private IEnumerator IFrames()
-    { 
-        UnityEngine.Debug.Log("IFrames started");
-        yield return new WaitForSeconds(invulnerableTime);
-        isDamageable = true;
-        UnityEngine.Debug.Log("IFrames ended!");
-    }
-
-    private IEnumerator AttackCooldown(float attackCooldown)
-    {
-        yield return new WaitForSeconds(attackCooldown);
-        canAttack = true;
-    }
-
-    public void SetPlayerPosition(Transform teleportTransform)
-    {
-        transform.position = new Vector2(teleportTransform.position.x, teleportTransform.position.y);
-        //UnityEngine.Debug.Log($"Player's position has been changed to {teleportTransform.position.x}, {teleportTransform.position.y}");
-    }
 
     public void SetCurrency(int newCurrency)
     {
@@ -513,6 +505,15 @@ public class PlayerCharacter : MonoBehaviour, IDamageable
     }
 
     public Dictionary<string, int> GetCurrentInventoryItems() => inventoryItems;
+    
+    private void SetCurrentInventoryItems(InventorySetupSO inventorySetup)
+    {
+        foreach (var item in inventorySetup.setInventoryItems) SetInventoryItemQuantity(item.itemType.ToString(), item.itemQuantity);
+    }
+
+    //can be called with a button on this script to reset inventory data if new one is provided
+    public void UpdateInventoryData() => SetCurrentInventoryItems(inventorySetupData);
+
 
     public void AddWeapon(string weaponName, GameObject gameObject) => availableWeapons.Add(weaponName, gameObject);
 

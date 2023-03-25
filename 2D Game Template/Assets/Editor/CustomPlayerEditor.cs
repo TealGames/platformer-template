@@ -20,6 +20,11 @@ public class CustomPlayerEditor : Editor
             playerScript.FreezePlayer(false);
         }
 
+        if (GUILayout.Button("Update Inventory Setup Data"))
+        {
+            playerScript.UpdateInventoryData();
+        }
+
     }
 
 }
