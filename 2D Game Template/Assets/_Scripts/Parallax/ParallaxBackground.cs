@@ -15,15 +15,28 @@ public class ParallaxBackground : MonoBehaviour
     void Start()
     {
         if (parallaxCamera == null)
-            parallaxCamera = Camera.main.GetComponent<ParallaxCamera>();
+            UnityEngine.Debug.LogWarning($"{gameObject.name}'s parallaxCamera field is null! It must be assigned in order for the parallax to work correctly!");
         if (parallaxCamera != null)
             parallaxCamera.onCameraTranslate += Move;
-        SetLayers();
+
+
+        GameManager.Instance.OnSceneLoadEnded += () =>
+        {
+            parallaxCamera = CameraSingleton.Instance.GetComponentInChildren<ParallaxCamera>();
+            if (parallaxCamera != null)
+            {
+                parallaxCamera.onCameraTranslate += Move;
+                if (this!=null)SetLayers();
+            }
+            else UnityEngine.Debug.LogWarning($"{gameObject.name} could not find the Parllax Camera script!");
+            
+        };
     }
 
     void SetLayers()
     {
         parallaxLayers.Clear();
+        UnityEngine.Debug.Log($"Accessing {gameObject.name}'s children!");
         for (int i = 0; i < transform.childCount; i++)
         {
             ParallaxLayer layer = transform.GetChild(i).GetComponent<ParallaxLayer>();
@@ -35,6 +48,7 @@ public class ParallaxBackground : MonoBehaviour
             }
         }
     }
+
     void Move(float delta)
     {
         foreach (ParallaxLayer layer in parallaxLayers)

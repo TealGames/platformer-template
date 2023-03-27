@@ -15,5 +15,3 @@ MonoBehaviour:
   setInventoryItems:
   - itemType: 1
     itemQuantity: 2
-  - itemType: 2
-    itemQuantity: 100

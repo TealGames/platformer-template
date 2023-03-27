@@ -6,14 +6,6 @@ using TMPro;
 using System.Reflection;
 using System;
 
-/*
-[System.Serializable]
-public class UnityEventThree : UnityEvent<GameManager.Singletons, string, object[]>
-{
-}
-*/
-
-
 /// <summary>
 /// A trigger with a specified area that invokes events when the player enters, exits, or stays and other settings
 /// </summary>

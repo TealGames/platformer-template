@@ -25,11 +25,17 @@ public class CameraEffects : MonoBehaviour
     void Start()
     {
         animator = GetComponent<Animator>();
-        GameManager.Instance.OnSceneLoadEnded += () =>
+
+        if (cameraType == CameraType.Default)
         {
-            Collider2D newConfinerCollider = GameObject.FindObjectOfType<Confiner>().GetComponent<Collider2D>();
-            ChangeConfiner(newConfinerCollider);
-        };
+            GameManager.Instance.OnSceneLoadEnded += () =>
+            {
+                Collider2D newConfinerCollider = GameObject.FindObjectOfType<Confiner>().GetComponent<Collider2D>();
+                ChangeConfiner(newConfinerCollider);
+            };
+        }
+
+        
 
         if (cameraType==CameraType.Default) vcam.Follow = PlayerCharacter.Instance.transform;
 

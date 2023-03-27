@@ -78,6 +78,7 @@ public class GameManager : MonoBehaviour
     {
         MainMenu,
         Playing,
+        Loading,
     }
     private GameState currentGameState;
 
@@ -185,7 +186,7 @@ public class GameManager : MonoBehaviour
     {
         UnityEngine.Debug.Log("Scene to unload is " + SceneManager.GetActiveScene().name);
         OnSceneLoadStarted?.Invoke();
-
+        currentGameState = GameState.Loading;
         
 
         Scene sceneToUnload = SceneManager.GetActiveScene();
@@ -219,12 +220,13 @@ public class GameManager : MonoBehaviour
         //yield return new WaitForSeconds(levelEntryDelay);
         yield return new WaitForEndOfFrame();
         StartCoroutine(NewLevelEnter(levelData));
-        
 
+        
         PlayerCharacter.Instance.FreezePlayer(false);
         PlayerCharacter.Instance.gameObject.SetActive(true);
     }
 
+    //alternative LoadSceneAsync() where instead of level data, we can specify scene name
     public IEnumerator LoadSceneAsync(string sceneName, bool teleportPlayer, Transform teleportPoint)
     {
         OnSceneLoadStarted?.Invoke();
@@ -260,7 +262,7 @@ public class GameManager : MonoBehaviour
         PlayerCharacter.Instance.gameObject.SetActive(true);
     }
 
-
+    /*
     public void LoadSceneAsync(int buildSettingsSceneIndex, bool showTitle, bool teleportPlayer, Transform teleportPoint)
     {
         int sceneToUnload = lastLoadedSceneIndex;
@@ -304,6 +306,7 @@ public class GameManager : MonoBehaviour
         else mainMenuWillLoad = false;
         //if not going back to main menu change last scene index
     }
+    */
 
 
 
