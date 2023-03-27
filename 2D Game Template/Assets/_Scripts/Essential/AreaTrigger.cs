@@ -10,7 +10,7 @@ using System;
 /// A trigger with a specified area that invokes events when the player enters, exits, or stays and other settings
 /// </summary>
 
-public class AreaTrigger : MonoBehaviour
+public class AreaTrigger : Trigger
 {
     [Header("Interactable")]
     [SerializeField] private bool isInteractableTrigger;
@@ -20,20 +20,6 @@ public class AreaTrigger : MonoBehaviour
     [SerializeField] private HUD.TextType interactMessageTextSize;
     public UnityEvent OnInteract;
     private bool canInteract = true;
-
-    [Header("Scene Load Trigger")]
-    [SerializeField][Tooltip("If true, then automatically handles teleport and transition")] private bool isSceneLoadPoint;
-    [SerializeField] private LevelSO loadLevelData;
-    [SerializeField][Tooltip("On the scene change, the location to teleport the player")] private Transform teleportPlayerPoint;
-
-    private bool inTrigger;
-    private bool sceneTriggered = false;
-
-    [SerializeField][Tooltip("On enter, it turns inactive")] private bool disableOnEnter;
-    [SerializeField][Tooltip("On exit, it turns inactive")] private bool disableOnExit;
-    [SerializeField] private ParticleSystem completionEffect;
-    [SerializeField] private AudioClip completionSound;
-    private AudioSource audioSource;
 
     [Header("Events")]
     public UnityEvent onEnter;
@@ -51,22 +37,14 @@ public class AreaTrigger : MonoBehaviour
 
 
     // Start is called before the first frame update
-    void Start()
+    private void Start()
     {
-        inTrigger = false;
-        audioSource = GetComponent<AudioSource>();
-
         PlayerCharacter.Instance.OnInteractableButtonPressed += InteractButtonPressed;
     }
 
-    // Update is called once per frame
-    void Update()
+    private void OnTriggerEnter2D(Collider2D collider)
     {
-       
-    }
-
-    void OnTriggerEnter2D(Collider2D collider)
-    {
+        base.OnEnter(collider);
         if (collider != null)
         {
 
@@ -74,14 +52,6 @@ public class AreaTrigger : MonoBehaviour
             {
                 onEnter.Invoke();
                 inTrigger = true;
-
-                if (isSceneLoadPoint && teleportPlayerPoint != null && loadLevelData!=null)
-                {
-                    UnityEngine.Debug.Log("The player has entered the hitbox");
-                    StartCoroutine(GameManager.Instance.LoadSceneAsync(loadLevelData, true, teleportPlayerPoint));
-                    //sceneTriggered = true;
-                    //StartCoroutine(SceneCooldown());
-                }
 
                 if (showInteractMessage && interactMessage != null && interactMessageTextSize != HUD.TextType.None) HUD.Instance.EnableText(interactMessageTextSize, interactMessage);
                 else if ((showInteractMessage && interactMessage == "") || (!showInteractMessage && interactMessage != ""))
@@ -94,7 +64,7 @@ public class AreaTrigger : MonoBehaviour
         }
     }
 
-    void OnTriggerStay2D(Collider2D collider)
+    private void OnTriggerStay2D(Collider2D collider)
     {
         if (collider != null)
         {
@@ -102,8 +72,9 @@ public class AreaTrigger : MonoBehaviour
         }
     }
 
-    void OnTriggerExit2D(Collider2D collider)
+    private void OnTriggerExit2D(Collider2D collider)
     {
+        base.OnExit(collider);
         if (collider != null)
         {
             if (collider.gameObject.TryGetComponent<PlayerCharacter>(out PlayerCharacter playerScript))
@@ -130,21 +101,10 @@ public class AreaTrigger : MonoBehaviour
         }
     }
 
-    public void EnableReminderText(string text)
-    {
-        DialogueManager.Instance.ShowReminderText(text);
-    }
+    public void EnableReminderText(string text)=> DialogueManager.Instance.ShowReminderText(text);
 
-    public void DisableReminderText()
-    {
-        DialogueManager.Instance.DisableReminderText();
-    }
+    public void DisableReminderText()=> DialogueManager.Instance.DisableReminderText();
 
-    private IEnumerator SceneCooldown()
-    {
-        yield return new WaitForSeconds(0.5f);
-        sceneTriggered = false;
-    }
     private IEnumerator InteractCooldown()
     {
         yield return new WaitForSeconds(interactCooldown);

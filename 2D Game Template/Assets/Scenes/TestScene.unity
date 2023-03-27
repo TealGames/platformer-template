@@ -20363,7 +20363,8 @@ GameObject:
   m_Component:
   - component: {fileID: 2028542542}
   - component: {fileID: 2028542541}
-  - component: {fileID: 2028542540}
+  - component: {fileID: 8403244203908899494}
+  - component: {fileID: 6925473483498376688}
   m_Layer: 0
   m_Name: Test Level 2 Trigger
   m_TagString: Untagged
@@ -20371,57 +20372,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &2028542540
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2028542539}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b9d2ef33d5b85904ba5f1013d34bd6aa, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  isInteractableTrigger: 0
-  interactCooldown: 0
-  showInteractMessage: 0
-  interactMessage: 
-  interactMessageTextSize: 0
-  OnInteract:
-    m_PersistentCalls:
-      m_Calls: []
-  isSceneLoadPoint: 1
-  loadLevelData: {fileID: 11400000, guid: b47a53f1bf39d14478cd491d6fe08972, type: 2}
-  teleportPlayerPoint: {fileID: 1849615673}
-  disableOnEnter: 0
-  disableOnExit: 0
-  completionEffect: {fileID: 0}
-  completionSound: {fileID: 0}
-  onEnter:
-    m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 2028542539}
-        m_TargetAssemblyTypeName: 
-        m_MethodName: 
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: 
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-  onStay:
-    m_PersistentCalls:
-      m_Calls: []
-  onExit:
-    m_PersistentCalls:
-      m_Calls: []
-  OnEntryExitButtonPressed:
-    m_PersistentCalls:
-      m_Calls: []
 --- !u!61 &2028542541
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -22734,6 +22684,26 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 217544f63e9f1e6428b7865f585031f4, type: 3}
+--- !u!114 &6925473483498376688
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2028542539}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e63958efe7c7fbb4e827d528a942634e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  disableOnEnter: 0
+  disableOnExit: 0
+  enterEffect: {fileID: 0}
+  particleSpawnLocation: {fileID: 0}
+  enterSound: {fileID: 0}
+  audioSource: {fileID: 8403244203908899494}
+  loadLevelData: {fileID: 11400000, guid: b47a53f1bf39d14478cd491d6fe08972, type: 2}
+  teleportPlayerPoint: {fileID: 1849615673}
 --- !u!1001 &7095000826831635836
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -22823,3 +22793,99 @@ PrefabInstance:
       objectReference: {fileID: 9100000, guid: 23b39feb4e5ee914aaef7cdf83b2e802, type: 2}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 27d4ce542f5f4bc4bb9a5e0b89f59456, type: 3}
+--- !u!82 &8403244203908899494
+AudioSource:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2028542539}
+  m_Enabled: 1
+  serializedVersion: 4
+  OutputAudioMixerGroup: {fileID: -7078698995100281598, guid: 201e81a1f454a8a4ba7667e6bafd79a0, type: 2}
+  m_audioClip: {fileID: 0}
+  m_PlayOnAwake: 1
+  m_Volume: 1
+  m_Pitch: 1
+  Loop: 0
+  Mute: 0
+  Spatialize: 0
+  SpatializePostEffects: 0
+  Priority: 128
+  DopplerLevel: 1
+  MinDistance: 1
+  MaxDistance: 500
+  Pan2D: 0
+  rolloffMode: 0
+  BypassEffects: 0
+  BypassListenerEffects: 0
+  BypassReverbZones: 0
+  rolloffCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  panLevelCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  spreadCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  reverbZoneMixCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
