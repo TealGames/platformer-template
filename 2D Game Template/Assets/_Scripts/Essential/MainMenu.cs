@@ -4,13 +4,16 @@ using UnityEngine;
 using System;
 using UnityEngine.SceneManagement;
 using System.Linq;
+using UnityEngine.UI;
 
 public class MainMenu : MonoBehaviour
 {
-    [SerializeField] private LevelSO firstLevel;
-    [SerializeField] private AudioClip gameStartSound;
+    [Tooltip("The sound made when Start Game button is clicked")][SerializeField] private AudioClip startGameSound;
+    [Tooltip("The sound made when return to main menu (when in file select menu) is clicked")][SerializeField] private AudioClip returnToMainMenuSound;
     [SerializeField] private string mainMenuSongName;
 
+    [SerializeField] private GameObject fileMenuContainer;
+    [SerializeField] private GameObject mainMenuContainer;
 
     private AudioSource audioSource;
     private Animator animator;
@@ -40,11 +43,14 @@ public class MainMenu : MonoBehaviour
 
     public void StartGame()
     {
+        if (audioSource!=null && startGameSound!=null) audioSource.PlayOneShot(startGameSound);
+        fileMenuContainer.SetActive(true);
+        mainMenuContainer.SetActive(false);
+    }
 
-        OnGameStart?.Invoke();
-
-        if (audioSource!=null)audioSource.PlayOneShot(gameStartSound);
-        StartCoroutine(GameManager.Instance.LoadSceneAsync(firstLevel, false, null));
+    public void EnableSettings()
+    {
+        HUD.Instance.GetComponentInChildren<SettingsMenu>().EnableSettingsMenu();
     }
 
     public void QuitGame()
@@ -53,8 +59,28 @@ public class MainMenu : MonoBehaviour
         inMainMenu = false;
     }
 
+    public void ReturnToMainMenu()
+    {
+        if (audioSource != null && returnToMainMenuSound != null) audioSource.PlayOneShot(returnToMainMenuSound);
+        fileMenuContainer.SetActive(false);
+        mainMenuContainer.SetActive(true);
+    }
+
+    public void NewGame()
+    {
+        OnGameStart?.Invoke();
+        DataPersistenceManager.Instance.NewGame();
+        GameManager.Instance.HandleNewGame();
+    }
+
+    public void ContinueGame()
+    {
+        OnGameStart?.Invoke();
+    }
+
     private void PlayMainMenuSong()
     {
-        
+
     }
+
 }

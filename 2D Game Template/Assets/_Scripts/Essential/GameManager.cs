@@ -17,6 +17,12 @@ public class GameManager : MonoBehaviour
     [SerializeField] [Tooltip("Whether or not to fade all playing sounds")] private bool fadeSoundsOnGameEnter;
     [SerializeField] private string gameStartMusicName;
 
+    [Header("New Game")]
+    [Tooltip("When new game is clicked, the first level data to load")][SerializeField] private LevelSO firstLevelData;
+    [Tooltip("When new game is clicked, the location the player spawns")][SerializeField] private Transform newGameSpawn;
+
+    [Header("Continue Game")]
+
     [Header("Levels")]
     [SerializeField] [Tooltip("The duration that a level title stays on screen before it gets deactivated")] private float titleDuration;
     [SerializeField][Tooltip("Once scene loads and transition fades out and NewLevelEnter() is called (starts song and sets title for level), the additional delay to add to the title showing")] private float levelTitleDelay = 0f;
@@ -140,6 +146,14 @@ public class GameManager : MonoBehaviour
             */
     }
 
+    public void HandleNewGame()
+    {
+        OnGameStart?.Invoke(); 
+        currentGameState = GameState.Playing;
+
+        LoadSceneAsync(firstLevelData, true, newGameSpawn);
+    }
+
     public void GameStarted()
     {
         OnGameStart?.Invoke();
@@ -230,6 +244,8 @@ public class GameManager : MonoBehaviour
     public IEnumerator LoadSceneAsync(string sceneName, bool teleportPlayer, Transform teleportPoint)
     {
         OnSceneLoadStarted?.Invoke();
+        currentGameState = GameState.Loading;
+
         UnityEngine.Debug.Log("Scene to unload is " + SceneManager.GetActiveScene().name);
         Scene sceneToUnload = SceneManager.GetActiveScene();
 

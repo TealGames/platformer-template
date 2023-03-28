@@ -5,8 +5,22 @@ using UnityEngine.SceneManagement;
 using UnityEngine.Events;
 using System;
 
-public class Collectible : MonoBehaviour
+/// <summary>
+/// Add this script to any item that physically appears in the world and can be isCollected when the player enters the collider. If its an item that would be classified in the enum CollectibleType then its a collectible
+/// </summary>
+
+
+
+public class Collectible : MonoBehaviour, IDataPersistence
 {
+    [Header("Object ID")]
+    [Tooltip("In order for the save system to remember what object was isCollected or not, it saves the isCollected object's id. " +
+        "To generate a random id, right click on script and select 'Generate guid for id'. A guid is a string of 32 random characters with low chance of repeating ids. ")]
+    private string id;
+
+    [ContextMenu("Generate guid for id")]
+    private void GenerateGuid() => id= System.Guid.NewGuid().ToString();
+
     private AudioSource audioSource;
     private Animator animator;
 
@@ -21,6 +35,8 @@ public class Collectible : MonoBehaviour
     }
     [SerializeField] private PlayerCharacter.InventoryItemTypes inventoryItemType;
 
+    private bool isCollected;
+
 
 
     public event Action<string> OnCollectibleCollected;
@@ -30,6 +46,8 @@ public class Collectible : MonoBehaviour
     {
         audioSource = GetComponent<AudioSource>();
         animator = GetComponent<Animator>();
+
+        if (id == "") GenerateGuid();
 
         //DontDestroyOnLoad(gameObject);
     }
@@ -41,6 +59,7 @@ public class Collectible : MonoBehaviour
 
     public void Collected()
     {
+        isCollected = true;
         audioSource.PlayOneShot(collectSound);
         if (animator != null) animator.SetTrigger("collected_trig");
         else gameObject.SetActive(false);
@@ -77,5 +96,17 @@ public class Collectible : MonoBehaviour
             Collected();
         }
         else UnityEngine.Debug.Log($"A non player object has entered {gameObject.name}'s collider!");
+    }
+
+    public void LoadData(GameData data)
+    {
+        data.collectiblesCollected.TryGetValue(id, out isCollected);
+        if (isCollected) gameObject.SetActive(false);
+    }
+
+    public void SaveData(GameData data)
+    {
+        if (data.collectiblesCollected.ContainsKey(id)) data.collectiblesCollected.Remove(id);
+        data.collectiblesCollected.Add(id, isCollected);
     }
 }

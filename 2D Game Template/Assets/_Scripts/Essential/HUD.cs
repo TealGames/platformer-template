@@ -63,7 +63,7 @@ public class HUD : MonoBehaviour
             if (i < maxHealthIcons) health[i].SetActive(true);
             else health[i].SetActive(false);
         }
-        coinAmountText.text = "0";
+        coinAmountText.text = PlayerCharacter.Instance.GetCurrency().ToString();
     }
 
     // Update is called once per frame

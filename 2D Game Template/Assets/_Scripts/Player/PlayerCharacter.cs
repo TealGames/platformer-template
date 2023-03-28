@@ -12,7 +12,7 @@ using AYellowpaper.SerializedCollections;
 /// Manages the player and what the player does, input control, events, damage, weapons, inventory, etc.
 /// </summary>
 
-public class PlayerCharacter : MonoBehaviour, IDamageable
+public class PlayerCharacter : MonoBehaviour, IDamageable, IDataPersistence
 {
     public static PlayerCharacter Instance;
 
@@ -142,10 +142,10 @@ public class PlayerCharacter : MonoBehaviour, IDamageable
     [SerializeField] private bool setInventoryItems;
 
     //[Tooltip("If true, will have the serialized dictionaries (available weapons and inventory) update their keys and values " +
-      //  "(note: it may be costly over time as a loop is run everytime a dictionary value is added)")]
+    //  "(note: it may be costly over time as a loop is run everytime a dictionary value is added)")]
     //[SerializeField] private bool displayDictionaryData;
 
-    [SerializeField] [Tooltip("If true and player starts a quest, then dialogue that only gets triggered with certain dialogue or choices is triggered from first NPC's interaction")] 
+    [SerializeField][Tooltip("If true and player starts a quest, then dialogue that only gets triggered with certain dialogue or choices is triggered from first NPC's interaction")]
     private bool dontRequireCertainDialogueToTriggerQuest;
 
     [Tooltip("The defined inventory item data that overrides the curent inventory items on Start()")][SerializeField] private InventorySetupSO inventorySetupData;
@@ -173,14 +173,13 @@ public class PlayerCharacter : MonoBehaviour, IDamageable
         canAttack = true;
         isFrozen = false;
 
-        foreach (var inventoryItem in Enum.GetNames(typeof(InventoryItemTypes)))
-        {
-            if (inventoryItem== InventoryItemTypes.None.ToString()) continue;
-            inventoryItems.Add(inventoryItem.ToString(), 0);
-            //UnityEngine.Debug.Log($"Added {inventoryItem} to dictionary");
-        }
-
+        //placeholder for save system (remove when system is completed)
+        SetDefaultInventory();
+        //placeholder for save system (remove when system is completed)
         SetBeginningWeapons();
+
+
+
         SetHealth(maxHealth);
         if (setInventoryItems && inventorySetupData != null) SetCurrentInventoryItems(inventorySetupData);
     }
@@ -191,13 +190,13 @@ public class PlayerCharacter : MonoBehaviour, IDamageable
         if (!isFrozen)
         {
             if (currentHealth <= 0 && !doNoRespawning && !hasInfiniteHealth) Killed();
-                //HandleRespawn();
+            //HandleRespawn();
 
             if (isGrounded)
             {
                 if (spawnDust)
                 {
-                    if (moveEffect!=null) Instantiate(moveEffect, groundCheck.transform.position, Quaternion.identity);
+                    if (moveEffect != null) Instantiate(moveEffect, groundCheck.transform.position, Quaternion.identity);
                     spawnDust = false;
                 }
             }
@@ -207,7 +206,7 @@ public class PlayerCharacter : MonoBehaviour, IDamageable
             if (Input.GetButtonDown("Jump") && !isFrozen)
             {
 
-                if (moveEffect!=null) Instantiate(moveEffect, groundCheck.transform.position, Quaternion.identity);
+                if (moveEffect != null) Instantiate(moveEffect, groundCheck.transform.position, Quaternion.identity);
                 animator.SetBool("isJumping_b", true);
                 isGrounded = false;
                 PlaySound(jumpSound, 0.5f, 1.2f, 0.8f);
@@ -242,7 +241,7 @@ public class PlayerCharacter : MonoBehaviour, IDamageable
 
     void OnCollisionEnter2D(Collision2D collision)
     {
-        
+
     }
 
     void OnTriggerEnter2D(Collider2D collider)
@@ -314,7 +313,7 @@ public class PlayerCharacter : MonoBehaviour, IDamageable
                     UnityEngine.Debug.Log("Found enemies to attack!");
                     if (enemy.gameObject.TryGetComponent<Enemy>(out Enemy enemyScript)) enemyScript.TakeDamage(currentDamage);
                     //PlaySound(currentWeaponScript.hitSound[UnityEngine.Random.Range(0, currentWeaponScript.hitSound.Length)], 0.9f, 1.1f, 0.5f);
-                    if (damageEffect!=null) Instantiate(damageEffect, weaponEdgePoint.position, Quaternion.identity);
+                    if (damageEffect != null) Instantiate(damageEffect, weaponEdgePoint.position, Quaternion.identity);
                 }
             }
             if (currentAttackCooldownCoroutine != null) StartCoroutine(currentAttackCooldownCoroutine);
@@ -334,7 +333,7 @@ public class PlayerCharacter : MonoBehaviour, IDamageable
         if (context.performed)
         {
             //UnityEngine.Debug.Log("Swap weapons triggered!");
-            if (availableWeapons.Count>1 && disableAttackCooldownOnSwap)
+            if (availableWeapons.Count > 1 && disableAttackCooldownOnSwap)
             {
                 canAttack = true;
                 if (currentAttackCooldownCoroutine != null) StopCoroutine(currentAttackCooldownCoroutine);
@@ -344,10 +343,10 @@ public class PlayerCharacter : MonoBehaviour, IDamageable
             //starting from the current weapon index, keep checking next weapon if its active (if active, then available)
             //for the amount of children in the parent weapon container
 
-            int index = currentWeapon.transform.GetSiblingIndex()+1;
-            for (int i= 0; i<weaponContainer.transform.childCount; i++)
+            int index = currentWeapon.transform.GetSiblingIndex() + 1;
+            for (int i = 0; i < weaponContainer.transform.childCount; i++)
             {
-                if (index > weaponContainer.transform.childCount-1) index = 0;
+                if (index > weaponContainer.transform.childCount - 1) index = 0;
                 if (weaponContainer.transform.GetChild(index).gameObject.activeSelf)
                 {
                     currentWeapon = weaponContainer.transform.GetChild(index).gameObject;
@@ -412,11 +411,11 @@ public class PlayerCharacter : MonoBehaviour, IDamageable
             UnityEngine.Debug.Log("Player was hit without iframes!");
 
             OnPlayerDamage?.Invoke();
-            if (damageEffect!=null) Instantiate(damageEffect, new Vector2(transform.position.x, transform.position.y + 2.0f), Quaternion.identity);
+            if (damageEffect != null) Instantiate(damageEffect, new Vector2(transform.position.x, transform.position.y + 2.0f), Quaternion.identity);
 
             //if (doMasterVolumeFadeOnHurt) StartCoroutine(AudioManager.Instance.SetMixerGroupVolume("Music", changeVolumeToOnHurt, volumeChangeDurationOnHurt, true));
-            if (animator!=null) animator.SetTrigger("hurt_trig");
-            if (hurtSound!=null) PlaySound(hurtSound, 0.9f, 1.1f, 1.0f);
+            if (animator != null) animator.SetTrigger("hurt_trig");
+            if (hurtSound != null) PlaySound(hurtSound, 0.9f, 1.1f, 1.0f);
 
             SetHealth(currentHealth - damage);
             UnityEngine.Debug.Log($"Player Health: {currentHealth}");
@@ -436,7 +435,7 @@ public class PlayerCharacter : MonoBehaviour, IDamageable
 
     public void Killed()
     {
-        
+
     }
 
     public void SetHealth(int health)
@@ -456,9 +455,9 @@ public class PlayerCharacter : MonoBehaviour, IDamageable
 
     public void HandleRespawn()
     {
-        if (killEffect!=null) Instantiate(killEffect, new Vector2(transform.position.x, transform.position.y + 2.0f), Quaternion.identity);
+        if (killEffect != null) Instantiate(killEffect, new Vector2(transform.position.x, transform.position.y + 2.0f), Quaternion.identity);
 
-        if (!dontLoseCurrencyOnKilled) currentCurrency= Mathf.RoundToInt(currentCurrency* currencyMultiplierOnKilled);
+        if (!dontLoseCurrencyOnKilled) currentCurrency = Mathf.RoundToInt(currentCurrency * currencyMultiplierOnKilled);
 
         PlaySound(respawnSound, 0.95f, 1.05f, 1.0f);
         SetHealth(maxHealth);
@@ -486,11 +485,11 @@ public class PlayerCharacter : MonoBehaviour, IDamageable
         currentCurrency = newCurrency;
     }
 
-    public int GetCurrency()=> currentCurrency;
+    public int GetCurrency() => currentCurrency;
 
     public void SetInventoryItemQuantity(string inventoryItemName, int newInventoryItemAmount)
     {
-        if (inventoryItems.ContainsKey(inventoryItemName)) inventoryItems[inventoryItemName]= newInventoryItemAmount;
+        if (inventoryItems.ContainsKey(inventoryItemName)) inventoryItems[inventoryItemName] = newInventoryItemAmount;
         else UnityEngine.Debug.LogWarning($"The argument {inventoryItemName} does not match any keys in the inventory items dictionary!");
     }
 
@@ -505,7 +504,7 @@ public class PlayerCharacter : MonoBehaviour, IDamageable
     }
 
     public Dictionary<string, int> GetCurrentInventoryItems() => inventoryItems;
-    
+
     private void SetCurrentInventoryItems(InventorySetupSO inventorySetup)
     {
         foreach (var item in inventorySetup.setInventoryItems) SetInventoryItemQuantity(item.itemType.ToString(), item.itemQuantity);
@@ -514,8 +513,50 @@ public class PlayerCharacter : MonoBehaviour, IDamageable
     //can be called with a button on this script to reset inventory data if new one is provided
     public void UpdateInventoryData() => SetCurrentInventoryItems(inventorySetupData);
 
+    //sets each inventory item type (from enum) to 0
+    public void SetDefaultInventory()
+    {
+        foreach (var inventoryItem in Enum.GetNames(typeof(InventoryItemTypes)))
+        {
+            if (inventoryItem == InventoryItemTypes.None.ToString()) continue;
+            inventoryItems.Add(inventoryItem.ToString(), 0);
+            //UnityEngine.Debug.Log($"Added {inventoryItem} to dictionary");
+        }
+    }
+
+    //used by the GameData class (since it does not know about the enum necessary to create dictionary) to default each value 
+    public SerializableDictionary<string,int> DefaultInventory()
+    {
+        SerializableDictionary<string, int> inventory= new SerializableDictionary<string, int>();
+        foreach (var inventoryItem in Enum.GetNames(typeof(InventoryItemTypes)))
+        {
+            if (inventoryItem == InventoryItemTypes.None.ToString()) continue;
+            inventory.Add(inventoryItem.ToString(), 0);
+        }
+        return inventory;
+    }
+    
+
 
     public void AddWeapon(string weaponName, GameObject gameObject) => availableWeapons.Add(weaponName, gameObject);
 
     public GameObject GetCurrentWeapon() => currentWeapon;
+
+    public void LoadData(GameData data)
+    {
+        this.currentCurrency = data.currencyQuantity;
+        this.transform.position = data.playerPosition;
+        this.inventoryItems= data.inventoryItems;
+    }
+
+    public void SaveData(GameData data)
+    {
+        data.currencyQuantity = this.currentCurrency;
+        data.playerPosition = this.transform.position;
+
+        //to convert Json-saved SerializableDictionary type to regular dictionary, we cast it and set data
+        Dictionary<string, int> nonSerializedDictionary = new Dictionary<string, int>();
+        nonSerializedDictionary = data.inventoryItems as Dictionary<string, int>;
+        nonSerializedDictionary = this.inventoryItems;
+    }
 }
