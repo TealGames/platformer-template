@@ -15,7 +15,7 @@ MonoBehaviour:
   levelName: Test Level 1
   textColor: {fileID: 11400000, guid: c97c62e58c47a804aab87633e9a2e59b, type: 2}
   sceneName: TestScene
-  levelMusic: Ambient_Music
+  levelMusic: Ambient_Music_2
   levelAmbience: 
   levelSFX: []
   fadeSounds: 1

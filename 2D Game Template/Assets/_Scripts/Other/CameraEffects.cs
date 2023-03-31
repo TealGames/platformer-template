@@ -28,7 +28,7 @@ public class CameraEffects : MonoBehaviour
 
         if (cameraType == CameraType.Default)
         {
-            GameManager.Instance.OnSceneLoadEnded += () =>
+            GameManager.Instance.OnNewLevelEntered += () =>
             {
                 Collider2D newConfinerCollider = GameObject.FindObjectOfType<Confiner>().GetComponent<Collider2D>();
                 ChangeConfiner(newConfinerCollider);

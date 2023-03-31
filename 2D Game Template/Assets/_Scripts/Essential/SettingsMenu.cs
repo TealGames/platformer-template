@@ -6,6 +6,7 @@ using TMPro;
 using UnityEngine.Events;
 using UnityEngine.UI;
 using UnityEngine.InputSystem;
+using System;
 
 public class SettingsMenu : MonoBehaviour
 {
@@ -38,6 +39,9 @@ public class SettingsMenu : MonoBehaviour
 
     private AudioSource audioSource;
     private Animator animator;
+
+    public Action OnReturn;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -46,7 +50,6 @@ public class SettingsMenu : MonoBehaviour
         audioSource = GetComponent<AudioSource>();
         animator = GetComponent<Animator>();
 
-        settingsMenuContainer.SetActive(false);
         SetMasterVolume(0f);
         SetMusicVolume(0f);
 
@@ -76,24 +79,27 @@ public class SettingsMenu : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-
+        
     }
 
     public void EnableSettingsMenu()
     {
+        UnityEngine.Debug.Log("Settings menu should enable");
         ActivateControlsTab();
         if (animator != null) animator.SetBool("isActivated", true);
         else settingsMenuContainer.SetActive(true);
         audioSource?.PlayOneShot(settingsMenuActivateSound);
     }
 
-
-    public void ReturnToPauseMenu()
+    
+    public void Return()
     {
+        OnReturn?.Invoke();
         if (animator != null) animator.SetBool("isActivated", false);
         else settingsMenuContainer.SetActive(false);
-        PauseMenu.ReturnToPauseMenu();
 
+        //if we are not in main menu settings, then return to pause menu (main menu gets notified by event and gets enabled then)
+        if (GameManager.Instance.GetCurrentGameState()!= GameManager.GameState.MainMenu) PauseMenu.ReturnToPauseMenu();
     }
 
     public void SetMasterVolume(float volume)

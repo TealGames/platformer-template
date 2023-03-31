@@ -13,11 +13,11 @@ public class HUD : MonoBehaviour
     public static HUD Instance;
 
     [SerializeField][Tooltip("Text displayed in the upper half of the screen, usually displaying level names and sections")] private TextMeshProUGUI headingText;
-    [SerializeField] [Tooltip("Large sized buttom screen text")] private TextMeshProUGUI largeText;
-    [SerializeField] [Tooltip("Medium sized buttom screen text")] private TextMeshProUGUI mediumText;
-    [SerializeField] [Tooltip("Small sized buttom screen text")] private TextMeshProUGUI smallText;
+    [SerializeField][Tooltip("Large sized buttom screen text")] private TextMeshProUGUI largeText;
+    [SerializeField][Tooltip("Medium sized buttom screen text")] private TextMeshProUGUI mediumText;
+    [SerializeField][Tooltip("Small sized buttom screen text")] private TextMeshProUGUI smallText;
 
-    
+
 
     public enum TextType
     {
@@ -36,6 +36,9 @@ public class HUD : MonoBehaviour
     private int currentHealthIcons;
     private int maxHealthIcons;
 
+    [Header("HUD Children")]
+    [SerializeField] private GameObject PlayerHUD;
+
     // Start is called before the first frame update
     void Awake()
     {
@@ -47,7 +50,7 @@ public class HUD : MonoBehaviour
         }
         DontDestroyOnLoad(gameObject);
 
-        
+
     }
 
     private void Start()
@@ -69,7 +72,8 @@ public class HUD : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-
+        if (GameManager.Instance.GetCurrentGameState() == GameManager.GameState.MainMenu || GameManager.Instance.GetCurrentGameState() == GameManager.GameState.Loading) PlayerHUD.SetActive(false);
+        else PlayerHUD.SetActive(true);
     }
 
     public void ChangeHealthIcons(int newHealth)

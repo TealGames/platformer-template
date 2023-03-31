@@ -68,7 +68,8 @@ public class Inventory : MonoBehaviour
                 Dictionary<string, int> inventoryItems = PlayerCharacter.Instance.GetCurrentInventoryItems();
                 foreach (var item in inventoryItems)
                 {
-                    if (PlayerCharacter.Instance.GetInventoryItemQuantity(item.Key) > 0)
+                    //if the cell represents an item that has a quantity greater than 0 and is not a "none" inventory item type (should not be possible)
+                    if (PlayerCharacter.Instance.GetInventoryItemQuantity(item.Key) > 0 && item.Key!= PlayerCharacter.InventoryItemTypes.None.ToString())
                     {
                         UnityEngine.Debug.Log($"Current testing {item.Key}, {item.Value}");
                         GameObject currentCell = GetCellByType(item.Key);

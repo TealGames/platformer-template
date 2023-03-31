@@ -1,11 +1,18 @@
+
+//Code from Trever Mock's video: https://www.youtube.com/watch?v=aUi9aijvpgs
+
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System;
 
-[System.Serializable]
+//delayed execution order prevents DefaultInventory() to be null
+[DefaultExecutionOrder(10000)] [System.Serializable]
 public class GameData
 {
+    //binary representation of when this instance of GameData was last updated
+    public long lastUpdated;
+
     public int currencyQuantity;
     public Vector3 playerPosition;
 
@@ -24,8 +31,17 @@ public class GameData
 
         //adds each inventory item type and sets its value to be 0
         inventoryItems = new SerializableDictionary<string, int>();
-        inventoryItems= PlayerCharacter.Instance.DefaultInventory();
+
+        foreach (var inventoryItem in Enum.GetNames(typeof(PlayerCharacter.InventoryItemTypes)))
+        {
+            if (inventoryItem == PlayerCharacter.InventoryItemTypes.None.ToString()) continue;
+            inventoryItems.Add(inventoryItem.ToString(), 0);
+        }
     }
 
-
+    public int GetPrecentageComplete()
+    {
+        UnityEngine.Debug.Log("The precentage completed is currently not being calculated, so a placeholder value of 0 is returned");
+        return 0;
+    }
 }

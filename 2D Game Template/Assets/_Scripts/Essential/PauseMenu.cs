@@ -63,6 +63,7 @@ public class PauseMenu : MonoBehaviour
     void Update()
     {
         //UnityEngine.Debug.Log(SceneManager.GetActiveScene().name);
+        
     }
 
     public void EnablePauseMenu()
@@ -132,9 +133,6 @@ public class PauseMenu : MonoBehaviour
         }
 
         OnReturnToMainMenu?.Invoke();
-
-        PlayerCharacter.Instance.FreezePlayer(false);
-        PlayerCharacter.Instance.gameObject.SetActive(false);
         pauseMenuContainer.SetActive(false);
         StartCoroutine(GameManager.Instance.LoadSceneAsync("MainMenu", false, null));
         

@@ -31,16 +31,18 @@ public class PlayerCharacter : MonoBehaviour, IDamageable, IDataPersistence
     //[SerializeField] private Transform attackPoint;
     [SerializeField] private Transform weaponEdgePoint;
 
-    [Tooltip("The container to hold the player's weapons. On start, all weapon gameObjects that are active will be party of the player's weapons. If GameObject weapon is deactivated then not included. " +
-        "Sprite renderer is disabled when that weapon is not being used.")]
-    [SerializeField] private GameObject weaponContainer;
 
     //[SerializeField] private Transform respawnPosition;
 
     //[SerializeField] private HUD hudScript;
     //[SerializeField] public CameraEffects cameraEffectsScript;
-    [SerializeField] public CinemachineVCamStates cameraStateScript;
+    //[SerializeField] public CinemachineVCamStates cameraStateScript;
 
+    [SerializeField] private GameObject visuals;
+    [Tooltip("The container to hold the player's weapons. On start, all weapon gameObjects that are active will be party of the player's weapons. If GameObject weapon is deactivated then not included. " +
+        "Sprite renderer is disabled when that weapon is not being used.")]
+    [SerializeField] private GameObject weaponContainer;
+    [SerializeField] private GameObject TransformContainer;
 
     [Header("Fields")]
 
@@ -52,6 +54,7 @@ public class PlayerCharacter : MonoBehaviour, IDamageable, IDataPersistence
     [SerializeField] private bool doMasterVolumeFadeOnHurt;
     [SerializeField] private float changeVolumeToOnHurt;
     [SerializeField] private float volumeChangeDurationOnHurt;
+    private float defaultGravity;
 
 
     private float verticalInput;
@@ -172,13 +175,12 @@ public class PlayerCharacter : MonoBehaviour, IDamageable, IDataPersistence
         isDamageable = true;
         canAttack = true;
         isFrozen = false;
+        defaultGravity = playerRb.gravityScale;
 
         //placeholder for save system (remove when system is completed)
         SetDefaultInventory();
         //placeholder for save system (remove when system is completed)
         SetBeginningWeapons();
-
-
 
         SetHealth(maxHealth);
         if (setInventoryItems && inventorySetupData != null) SetCurrentInventoryItems(inventorySetupData);
@@ -187,6 +189,9 @@ public class PlayerCharacter : MonoBehaviour, IDamageable, IDataPersistence
     // Update is called once per frame
     void Update()
     {
+        if (GameManager.Instance.GetCurrentGameState() == GameManager.GameState.MainMenu || GameManager.Instance.GetCurrentGameState() == GameManager.GameState.Loading) SetPlayerVisibility(false);
+        else SetPlayerVisibility(true);
+
         if (!isFrozen)
         {
             if (currentHealth <= 0 && !doNoRespawning && !hasInfiniteHealth) Killed();
@@ -227,7 +232,7 @@ public class PlayerCharacter : MonoBehaviour, IDamageable, IDataPersistence
         }
     }
 
-    void FixedUpdate()
+    private void FixedUpdate()
     {
         if (!isFrozen)
         {
@@ -470,10 +475,28 @@ public class PlayerCharacter : MonoBehaviour, IDamageable, IDataPersistence
     {
         if (freezePlayer)
         {
-            animator.SetFloat("moveSpeed_f", 0.0f);
+            animator.SetFloat("speed_f", 0.0f);
             isFrozen = true;
         }
         else isFrozen = false;
+    }
+
+    //allows script to continue running while player is not seen and is not moving
+    private void SetPlayerVisibility(bool visiblity)
+    {
+        UnityEngine.Debug.Log("Player visiblity is set to " + visiblity);
+        FreezePlayer(!visiblity);
+
+        visuals.SetActive(visiblity);
+        TransformContainer.SetActive(visiblity);
+        weaponContainer.SetActive(visiblity);
+
+        if (visiblity)
+        {
+            playerRb.constraints = RigidbodyConstraints2D.None;
+            playerRb.constraints = RigidbodyConstraints2D.FreezeRotation;
+        }
+        else playerRb.constraints = RigidbodyConstraints2D.FreezeAll;
     }
 
     public void SetPlayerPosition(Transform teleportTransform) => transform.position = new Vector2(teleportTransform.position.x, teleportTransform.position.y);
@@ -523,20 +546,6 @@ public class PlayerCharacter : MonoBehaviour, IDamageable, IDataPersistence
             //UnityEngine.Debug.Log($"Added {inventoryItem} to dictionary");
         }
     }
-
-    //used by the GameData class (since it does not know about the enum necessary to create dictionary) to default each value 
-    public SerializableDictionary<string,int> DefaultInventory()
-    {
-        SerializableDictionary<string, int> inventory= new SerializableDictionary<string, int>();
-        foreach (var inventoryItem in Enum.GetNames(typeof(InventoryItemTypes)))
-        {
-            if (inventoryItem == InventoryItemTypes.None.ToString()) continue;
-            inventory.Add(inventoryItem.ToString(), 0);
-        }
-        return inventory;
-    }
-    
-
 
     public void AddWeapon(string weaponName, GameObject gameObject) => availableWeapons.Add(weaponName, gameObject);
 

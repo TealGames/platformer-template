@@ -2036,6 +2036,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Projectile
       objectReference: {fileID: 0}
+    - target: {fileID: 135524283672901908, guid: ffcb146ec3c29ab478e15edc0eec782d, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 135524283672902123, guid: ffcb146ec3c29ab478e15edc0eec782d, type: 3}
       propertyPath: m_RootOrder
       value: 4
@@ -2149,6 +2153,10 @@ PrefabInstance:
     - target: {fileID: 9034694024592237249, guid: e7ab347d31db0654289c0f4f46d86e30, type: 3}
       propertyPath: m_Name
       value: Shooting Enemy
+      objectReference: {fileID: 0}
+    - target: {fileID: 9034694024592237249, guid: e7ab347d31db0654289c0f4f46d86e30, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 9034694024592237251, guid: e7ab347d31db0654289c0f4f46d86e30, type: 3}
       propertyPath: m_RootOrder
@@ -2438,6 +2446,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Follow Enemy
       objectReference: {fileID: 0}
+    - target: {fileID: 2149821869877992405, guid: c6ea18eaf66ae0c42920045e73f998e6, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 2149821869877992407, guid: c6ea18eaf66ae0c42920045e73f998e6, type: 3}
       propertyPath: m_RootOrder
       value: 2
@@ -2656,6 +2668,10 @@ PrefabInstance:
     - target: {fileID: 4554397350002818705, guid: 27d4ce542f5f4bc4bb9a5e0b89f59456, type: 3}
       propertyPath: m_Name
       value: Patrol Enemy
+      objectReference: {fileID: 0}
+    - target: {fileID: 4554397350002818705, guid: 27d4ce542f5f4bc4bb9a5e0b89f59456, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4554397350002818707, guid: 27d4ce542f5f4bc4bb9a5e0b89f59456, type: 3}
       propertyPath: m_RootOrder

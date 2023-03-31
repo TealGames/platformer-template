@@ -30,12 +30,13 @@ public class GameManager : MonoBehaviour
 
     private static bool sceneLoaded = false;
     private string currentLoadedScene;
-    public static int lastLoadedSceneIndex { get; set; } = 1;
+
 
     [Header("Transitions")]
     [SerializeField] private Animator transitionAnimator;
     [SerializeField] private GameObject blackScreen;
     [SerializeField] [Tooltip("The speed of either half of the transition animation(start or end)")] private float transitionSpeed = 1f;
+    private bool sceneLoadingTriggered;
 
     [SerializeField][Tooltip("The duration that it takes for the Audio Manager to fade all playing sounds out")] private float soundFadeOutDuration;
     [SerializeField] [Tooltip("The duration that it takes for the Audio Manager to fade all playing sounds in")] private float soundFadeInDuration;
@@ -43,33 +44,21 @@ public class GameManager : MonoBehaviour
     [SerializeField][Tooltip("Delay of the level name and music when the transition ends")] private float levelEntryDelay;
     [SerializeField][Tooltip("If true, then after fade out transition trigger is called, will wait the animations duration before loading and unloading scenes")] private bool offsetLoadByAnimationDuration;
 
+    [SerializeField] private AudioClip sceneChangeSound;
+    [SerializeField][Tooltip("Duration of the fade out of master mixer volume (all audio)")] float masterVolumeFadeDuration;
+
+
+    [Header("Other")]
+    [SerializeField] private PauseMenu pauseMenuScript;
+
+
     [Header("Tools")]
     [SerializeField] private bool changeTimeScale;
     [SerializeField][Range(0, 2)] private float adjustedTimeScale;
 
-    [Space(10)]
-
-    [SerializeField] [Tooltip("Duration of the transition in between starting and ending animations")] float transitionDuration;
-    [SerializeField] [Tooltip("Duration of the fade out of master mixer volume (all audio)")] float masterVolumeFadeDuration;
-    
-    private bool readyToPlayLevel; //detects when level transition ends
-
-    
-    [SerializeField] private float onStartMasterVolumeSilenceDuration;
-    [SerializeField] private AudioMixer audioMixer;
     private float defaultVolume;
-    [SerializeField] private GameObject settingsMenu;
     private AudioSource audioSource;
-    [SerializeField] private AudioClip sceneChangeSound;
 
-    [SerializeField] private PauseMenu pauseMenuScript;
-
-    [SerializeField] private bool playAmbientSounds;
-    private bool playMusic;
-
-    private bool canDoLevelTitle = true;
-    [HideInInspector] public bool showTitle;
-    private bool firstTutorialLevelLoad = true;
 
     private bool mainMenuWillLoad;
 
@@ -77,8 +66,9 @@ public class GameManager : MonoBehaviour
     public event Action OnGameEnd;
     public event Action OnSceneLoadStarted;
     public event Action OnSceneLoadEnded;
+    public event Action OnNewLevelEntered;
 
-    private bool sceneLoadingTriggered;
+    
 
     public enum GameState
     {
@@ -108,24 +98,12 @@ public class GameManager : MonoBehaviour
         if (changeTimeScale) changeTimeScale = false;
         //pauseMenuScript.OnMainMenuLoaded += OnMainMenuLoad;
         SceneManager.sceneLoaded += OnSceneLoaded;
-        pauseMenuScript.OnReturnToMainMenu += () => currentGameState = GameState.MainMenu;
-
-        StartCoroutine(NewLevelEnter(levels[0]));
-
-        /*
-        if (fadeSoundsOnGameEnter && GameStartFadeDuration>0f)
-        {
-            AudioManager.Instance.Play(gameStartMusicName);
-            StartCoroutine(AudioManager.Instance.FadeIn(GameStartFadeDuration));
-        }
-        */
+        //pauseMenuScript.OnReturnToMainMenu += () => currentGameState = GameState.MainMenu;
          
         audioSource = GetComponent<AudioSource>();
         transitionAnimator.SetFloat("transitionMultiplier_f", transitionSpeed);
 
         //defaultVolume = Mathf.Pow(10, (settingsMenu.GetComponent<SettingsMenu>().masterVolumeSlider.value) / 20);
-
-        GameStarted();
 
         
     }
@@ -136,28 +114,24 @@ public class GameManager : MonoBehaviour
         //UnityEngine.Debug.Log($"Scene loaded is {sceneLoaded}");
         if (changeTimeScale) Time.timeScale = adjustedTimeScale;
         UnityEngine.Debug.Log($"Game state is {currentGameState}");
-            /*
-        if (sceneLoaded)
-        //since active scene cant be set until the scene has loaded we subscribe to the event and set it as active scene when it has finished loading
+
+        //first scene in build settings should always be main menu
+        if (SceneManager.GetActiveScene()== SceneManager.GetSceneByBuildIndex(0))
         {
-            
-            sceneLoaded = false;
+            //currentGameState = GameState.MainMenu;
+            UnityEngine.Debug.Log("Game state is menu for some reason!");
         }
-            */
+            
+        UnityEngine.Debug.Log("Current active scene is " + SceneManager.GetActiveScene().buildIndex);
     }
 
-    public void HandleNewGame()
+    public void LoadFirstScene()
     {
+        UnityEngine.Debug.Log("LoadFirstScene() is called!");
         OnGameStart?.Invoke(); 
-        currentGameState = GameState.Playing;
 
-        LoadSceneAsync(firstLevelData, true, newGameSpawn);
-    }
-
-    public void GameStarted()
-    {
-        OnGameStart?.Invoke();
-        currentGameState = GameState.Playing;
+        
+        StartCoroutine(LoadSceneAsync(firstLevelData, true, newGameSpawn));
     }
 
 
@@ -172,7 +146,16 @@ public class GameManager : MonoBehaviour
 
     private IEnumerator NewLevelEnter(LevelSO levelData)
     {
+
+        
+        //whenever a new level is called, it must be during play mode (and not during loading or main menu)
+        currentGameState = GameState.Playing;
+
         yield return new WaitForSeconds(levelEntryDelay);
+        OnNewLevelEntered?.Invoke();
+
+
+
         UnityEngine.Debug.Log("New Level Enter called!");
         if (!string.IsNullOrEmpty(levelData.levelName))
         {
@@ -193,7 +176,7 @@ public class GameManager : MonoBehaviour
         yield return new WaitForSeconds(titleDuration);
         HUD.Instance.DisableText(HUD.TextType.Title);
 
-        OnSceneLoadEnded?.Invoke();
+        
     } 
 
     public IEnumerator LoadSceneAsync(LevelSO levelData, bool teleportPlayer, Transform teleportPoint)
@@ -215,10 +198,6 @@ public class GameManager : MonoBehaviour
             yield return new WaitForSeconds(transitionAnimator.GetCurrentAnimatorStateInfo(0).length);
         }
 
-        //to prevent player from falling out of world when new level loads
-        PlayerCharacter.Instance.FreezePlayer(true);
-        PlayerCharacter.Instance.gameObject.SetActive(false);
-
         AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(SceneUtility.GetBuildIndexByScenePath(scenePath));
         AsyncOperation asyncUnload = SceneManager.UnloadSceneAsync(sceneToUnload.buildIndex);
         yield return new WaitForEndOfFrame();
@@ -231,13 +210,10 @@ public class GameManager : MonoBehaviour
         }
         transitionAnimator.SetTrigger("endTransition_trig");
         
-        //yield return new WaitForSeconds(levelEntryDelay);
         yield return new WaitForEndOfFrame();
         StartCoroutine(NewLevelEnter(levelData));
 
-        
-        PlayerCharacter.Instance.FreezePlayer(false);
-        PlayerCharacter.Instance.gameObject.SetActive(true);
+        OnSceneLoadEnded?.Invoke();
     }
 
     //alternative LoadSceneAsync() where instead of level data, we can specify scene name
@@ -258,10 +234,6 @@ public class GameManager : MonoBehaviour
             yield return new WaitForSeconds(transitionAnimator.GetCurrentAnimatorStateInfo(0).length);
         }
 
-        //to prevent player from falling out of world when new level loads
-        PlayerCharacter.Instance.FreezePlayer(true);
-        PlayerCharacter.Instance.gameObject.SetActive(false);
-
         AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(sceneName);
         AsyncOperation asyncUnload = SceneManager.UnloadSceneAsync(sceneToUnload.buildIndex);
         yield return new WaitForEndOfFrame();
@@ -273,9 +245,6 @@ public class GameManager : MonoBehaviour
         }
         transitionAnimator.SetTrigger("endTransition_trig");
         yield return new WaitForEndOfFrame();
-        
-        PlayerCharacter.Instance.FreezePlayer(false);
-        PlayerCharacter.Instance.gameObject.SetActive(true);
     }
 
     /*
@@ -335,7 +304,7 @@ public class GameManager : MonoBehaviour
     public void GameEnd()
     {
         OnGameEnd?.Invoke();
-        PlayerCharacter.Instance.gameObject.SetActive(false);
+        //PlayerCharacter.Instance.gameObject.SetActive(false);
 
         DialogueManager.Instance.gameObject.transform.Find("Player HUD").gameObject.SetActive(false);
 

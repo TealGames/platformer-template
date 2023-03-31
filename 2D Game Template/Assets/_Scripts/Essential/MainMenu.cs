@@ -6,14 +6,18 @@ using UnityEngine.SceneManagement;
 using System.Linq;
 using UnityEngine.UI;
 
-public class MainMenu : MonoBehaviour
+public class MainMenu : Menu
 {
+    [Header("Audio")]
     [Tooltip("The sound made when Start Game button is clicked")][SerializeField] private AudioClip startGameSound;
     [Tooltip("The sound made when return to main menu (when in file select menu) is clicked")][SerializeField] private AudioClip returnToMainMenuSound;
     [SerializeField] private string mainMenuSongName;
 
-    [SerializeField] private GameObject fileMenuContainer;
-    [SerializeField] private GameObject mainMenuContainer;
+    [Header("GameObject References")]
+    [SerializeField] private GameObject fileMenu;
+    [SerializeField] private GameObject mainMenu;
+    [SerializeField] private Button continueButton;
+    [SerializeField] private Button loadGameButton;
 
     private AudioSource audioSource;
     private Animator animator;
@@ -25,32 +29,59 @@ public class MainMenu : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        //since main menu is its own scene, we need to call another event in GameManager to be used by non-singleton scripts
-        OnGameStart += GameManager.Instance.GameStarted;
         audioSource = GetComponent<AudioSource>();
         animator = GetComponent<Animator>();
 
         AudioManager.Instance.Play(mainMenuSongName);
         inMainMenu = true;
-        PlayerCharacter.Instance.gameObject.SetActive(false);
+
+        DisableButtonsDependingOnData();
     }
 
-    // Update is called once per frame
-    void Update()
+    private void DisableButtonsDependingOnData()
     {
-
+        if (!DataPersistenceManager.Instance.HasGameData())
+        {
+            continueButton.interactable = false;
+            loadGameButton.interactable = false;
+        }
     }
 
-    public void StartGame()
+    //if user wants to start a new game and select a file to save it to
+    public void NewGame()
     {
         if (audioSource!=null && startGameSound!=null) audioSource.PlayOneShot(startGameSound);
-        fileMenuContainer.SetActive(true);
-        mainMenuContainer.SetActive(false);
+        fileMenu.GetComponent<SaveSlotsMenu>().ActivateMenu(false);
+
+        mainMenu.SetActive(false);
+    }
+
+    //if the user wants to return to a previous save file and not the most recent save file
+    public void LoadGame()
+    {
+        if (audioSource != null && startGameSound != null) audioSource.PlayOneShot(startGameSound);
+        fileMenu.GetComponent<SaveSlotsMenu>().ActivateMenu(true);
+
+        mainMenu.SetActive(false);
+
+    }
+
+
+    //since a game data is loaded when a scene is loaded, by loading first scene, all data is auto loaded
+    //NOTE: THIS DOES NOT IMPLEMENT SCENE SAVING SINCE FIRST SCENE IS ALWAYS CALLED RATHER THAN LAST SCENE PLAYER WAS IN
+    public void ContinueGame()
+    {
+        //save game before loading scene
+        DataPersistenceManager.Instance.SaveGame();
+        GameManager.Instance.LoadFirstScene();
     }
 
     public void EnableSettings()
     {
-        HUD.Instance.GetComponentInChildren<SettingsMenu>().EnableSettingsMenu();
+        mainMenu.SetActive(false);
+        SettingsMenu settingsScript = HUD.Instance.GetComponentInChildren<SettingsMenu>();
+        settingsScript.EnableSettingsMenu();
+        settingsScript.OnReturn += () => mainMenu.SetActive(true);
     }
 
     public void QuitGame()
@@ -62,21 +93,14 @@ public class MainMenu : MonoBehaviour
     public void ReturnToMainMenu()
     {
         if (audioSource != null && returnToMainMenuSound != null) audioSource.PlayOneShot(returnToMainMenuSound);
-        fileMenuContainer.SetActive(false);
-        mainMenuContainer.SetActive(true);
+        fileMenu.SetActive(false);
+        mainMenu.SetActive(true);
+
+        //refreshes main menu page if user clears data and cannot continue (no current save file) or load
+        DisableButtonsDependingOnData();
     }
 
-    public void NewGame()
-    {
-        OnGameStart?.Invoke();
-        DataPersistenceManager.Instance.NewGame();
-        GameManager.Instance.HandleNewGame();
-    }
-
-    public void ContinueGame()
-    {
-        OnGameStart?.Invoke();
-    }
+    
 
     private void PlayMainMenuSong()
     {
